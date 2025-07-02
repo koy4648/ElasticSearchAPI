@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ElasticSearchAPI
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: elastic
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: articles
