@@ -8,9 +8,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.Mapping;
+import org.springframework.data.elasticsearch.annotations.Setting;
 
 
-@Document(indexName = "basic")
+@Document(indexName = "article")
+@Setting(settingPath = "/elasticsearch/settings/korean-analyzer.json")
+@Mapping(mappingPath = "/elasticsearch/mappings/article-data-mapping.json")
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
