@@ -5,7 +5,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,23 +16,21 @@ public class IndexingController {
 
     private final IndexingService indexingService;
 
-    @GetMapping("/fileToMongo")
-    public ResponseEntity<String> saveFileToMongo() {
-        try {
-            indexingService.parseJson();
-            return ResponseEntity.ok().build();
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    @PostMapping("/fileToMongo")
+    public ResponseEntity<Void> saveFileToMongo() throws IOException {
+        indexingService.parseJson();
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/mongoToElastic")
-    public ResponseEntity<String> saveMongoToElastic() {
-        try {
-            indexingService.indexToEs();
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+    @PostMapping("/basicToElastic")
+    public ResponseEntity<Void> basicToEs() {
+        indexingService.indexBasicToEs();
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/articleToElastic")
+    public ResponseEntity<Void> articleToEs() {
+        indexingService.indexArticleToEs();
+        return ResponseEntity.ok().build();
     }
 }
