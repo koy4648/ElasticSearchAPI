@@ -1,18 +1,14 @@
 package com.saltlux.kys.controller;
 
-import com.saltlux.kys.domain.ArticleES;
+import com.saltlux.kys.dto.request.SearchFilterRequest;
 import com.saltlux.kys.util.PageableUtils;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import com.saltlux.kys.domain.ArticleBasicInfo;
 import com.saltlux.kys.dto.response.SearchApiResponse;
 import com.saltlux.kys.service.SearchService;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.elasticsearch.core.SearchHits;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,27 +23,6 @@ public class SearchController {
 
     private final SearchService searchService;
 
-    //    @GetMapping("/test")
-//    public ResponseEntity<SearchApiResponse> testSearch() {
-//        SearchHits<ArticleBasicInfo> searchHits = searchService.searchTest();
-//
-//        List<ArticleBasicInfo> articles = searchHits.getSearchHits()
-//            .stream()
-//            .map(SearchHit::getContent)
-//            .collect(Collectors.toList());
-//
-//        SearchApiResponse apiResponse;// = new SearchApiResponse(searchHits.getTotalHits(), articles);
-//        return ResponseEntity.ok(apiResponse);
-//    }
-//
-//    @GetMapping("/basic")
-//    public ResponseEntity<?> basicSearch(@RequestParam String field, @RequestParam String keywords,
-//        Pageable pageable) {
-//        Pageable safePageable = PageableUtils.sanitize(pageable);
-//        return ResponseEntity.ok(
-//            searchService.searchByKeywordBasic(field, keywords, safePageable));
-//    }
-//
     @GetMapping("/bool")
     public ResponseEntity<SearchApiResponse> boolSearch(@RequestParam String field,
         @RequestParam(required = false) List<String> andKeywords,
@@ -69,4 +44,11 @@ public class SearchController {
         );
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<?> filterSearch(
+        @ParameterObject SearchFilterRequest request,
+        @ParameterObject Pageable pageable
+    ) {
+        return ResponseEntity.ok(searchService.searchByFilters(request, pageable));
+    }
 }
