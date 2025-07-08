@@ -1,5 +1,6 @@
 package com.saltlux.kys.domain;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,25 +9,22 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.elasticsearch.annotations.Mapping;
-import org.springframework.data.elasticsearch.annotations.Setting;
 
 
-@Document(indexName = "article")
-@Setting(settingPath = "/elasticsearch/settings/korean-analyzer.json")
-@Mapping(mappingPath = "/elasticsearch/mappings/article-data-mapping.json")
+@Document(indexName = "basic")
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Data
-public class ArticleDataES {
+public class ArticleBasicInfo {
 
     @Id
     String id;
 
-    @Field(type= FieldType.Date)
-    String publishedAt;
+    @Field(type = FieldType.Date)
+    Instant publishedAt;
 
+    @Field(type = FieldType.Keyword)
     String[] category;
 
     @Field(type= FieldType.Text)

@@ -17,6 +17,6 @@ public class FileIndexingServiceTest {
     }
     @Test
     void testMongoToEs(){
-        indexingService.indexToEs();
+        indexingService.indexBasicToEs();
     }
 }

@@ -1,8 +1,8 @@
 package com.saltlux.kys.repository;
 
-import com.saltlux.kys.domain.ArticleDataESBasic;
+import com.saltlux.kys.domain.ArticleBasicInfo;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 
-public interface ArticleEsRepository extends ElasticsearchRepository<ArticleDataESBasic,String> {
+public interface ArticleEsRepository extends ElasticsearchRepository<ArticleBasicInfo,String> {
 
 }

@@ -1,6 +1,5 @@
 package com.saltlux.kys.domain;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @NoArgsConstructor
 @ToString
 @Data
-public class ArticleDataMongo {
+public class ArticleMongo {
 
     @Id
     @Field("news_id")

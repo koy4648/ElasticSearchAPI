@@ -1,3 +1,11 @@
+logging:
+  level:
+    org.springframework.data.elasticsearch: DEBUG
+    org.elasticsearch.client: TRACE
+    org.elasticsearch.index.query: TRACE
+    org.apache.http: WARN
+    org.apache.http.wire: DEBUG
+
 spring:
   application:
     name: ElasticSearchAPI
@@ -7,9 +15,21 @@ spring:
     uris: http://localhost:9200
     username: elastic
     password: elastic
-
   data:
     mongodb:
       host: localhost
       port: 27017
       database: articles
+
+tms:
+  api:
+    baseUrl: http://localhost:8090
+indexing:
+  source-file-path: ./dataExample.txt
+
+server:
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
