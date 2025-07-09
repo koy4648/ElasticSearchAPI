@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.saltlux.kys.domain.ArticleES;
 import com.saltlux.kys.domain.ArticleBasicInfo;
 import com.saltlux.kys.domain.ArticleMongo;
-import com.saltlux.kys.dto.request.TMSAnalysisRequest;
-import com.saltlux.kys.dto.response.TmsAnalysisResponse;
 import com.saltlux.kys.repository.ArticleMongoRepository;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -29,12 +26,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class IndexingService {
 
-    private final WebClient webClient;
+    private final TmsApiClient tmsApiClient;
     private final ArticleMongoRepository mongoRepository;
     private final ElasticsearchOperations elasticsearchOperations;
     private final ObjectMapper objectMapper;
     @Value("${indexing.source-file-path}")
     private String sourceFilePath;
+
 
     public void parseJson() throws IOException {
         Path path = Paths.get(sourceFilePath);
@@ -77,7 +75,7 @@ public class IndexingService {
     private Mono<ArticleES> convertArticleToIndex(ArticleMongo articleMongo) {
         String toConvert = articleMongo.getTitle().concat(articleMongo.getContent());
 
-        return getTMSResult(toConvert).map(
+        return tmsApiClient.analyzeText(toConvert).map(
             tmsAnalysisResponse -> new ArticleES(articleMongo.getNewsId(),
                 Instant.parse(articleMongo.getPublishedAt()), articleMongo.getCategory(),
                 articleMongo.getTitle(),
@@ -97,13 +95,4 @@ public class IndexingService {
             ));
     }
 
-    private Mono<TmsAnalysisResponse> getTMSResult(String text) {
-        TMSAnalysisRequest request = new TMSAnalysisRequest(text);
-        String TMS_API_URI = "/api/tms/analyze";
-        return webClient.post().uri(TMS_API_URI).bodyValue(request)
-            .retrieve().bodyToMono(TmsAnalysisResponse.class)
-            .doOnError(error -> log.error("TMS 연동 실패", error))
-            .onErrorReturn(new TmsAnalysisResponse());
-
-    }
 }

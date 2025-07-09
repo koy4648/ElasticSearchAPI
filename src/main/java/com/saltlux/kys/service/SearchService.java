@@ -1,31 +1,36 @@
 package com.saltlux.kys.service;
 
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchAllQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.TermsQuery;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
 import com.saltlux.kys.domain.ArticleES;
 import com.saltlux.kys.dto.request.SearchFilterRequest;
-import com.saltlux.kys.util.PageableUtils;
-import java.util.ArrayList;
-import org.springframework.data.elasticsearch.core.SearchHit;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import com.saltlux.kys.dto.response.SearchApiResponse;
+import com.saltlux.kys.util.PageableUtils;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+
 
 @Service
 @Validated
@@ -78,11 +83,12 @@ public class SearchService {
             filterClauses.add(buildTermQuery("tms_entity_name_person", request.person()));
         }
         if (StringUtils.hasText(request.organization())) {
-            filterClauses.add(buildTermQuery("tms_entity_name_organization", request.organization()));
+            filterClauses.add(
+                buildTermQuery("tms_entity_name_organization", request.organization()));
         }
 
         if (request.minScore() != null || request.maxScore() != null) {
-            filterClauses.add(RangeQuery.of(r->{
+            filterClauses.add(RangeQuery.of(r -> {
                 r.field("tms_sentiment_polarity_score");
                 if (request.minScore() != null) {
                     r.gte(JsonData.of(request.minScore()));
@@ -95,7 +101,7 @@ public class SearchService {
         }
 
         if (request.startDate() != null || request.endDate() != null) {
-            filterClauses.add(RangeQuery.of(r->{
+            filterClauses.add(RangeQuery.of(r -> {
                 r.field("publishedAt");
                 if (request.startDate() != null) {
                     r.gte(JsonData.of(request.startDate()));
@@ -107,17 +113,17 @@ public class SearchService {
             })._toQuery());
         }
         Query finalQuery;
-        if(filterClauses.isEmpty()){
-            finalQuery= MatchAllQuery.of(m->m)._toQuery();
-        }else{
-            finalQuery = BoolQuery.of(b->b.filter(filterClauses))._toQuery();
+        if (filterClauses.isEmpty()) {
+            finalQuery = MatchAllQuery.of(m -> m)._toQuery();
+        } else {
+            finalQuery = BoolQuery.of(b -> b.filter(filterClauses))._toQuery();
         }
 
         return executeSearch(finalQuery, pageable);
     }
 
-    private Query buildTermQuery(String field, String value){
-        return TermQuery.of(t->t.field(field).value(value))._toQuery();
+    private Query buildTermQuery(String field, String value) {
+        return TermQuery.of(t -> t.field(field).value(value))._toQuery();
     }
 
     private Query buildTermsQuery(String field, List<String> keywords) {
@@ -128,8 +134,7 @@ public class SearchService {
     private SearchApiResponse executeSearch(Query query, Pageable pageable) {
         Pageable safePageable = PageableUtils.sanitize(pageable);
         NativeQuery searchQuery = NativeQuery.builder().withQuery(query)
-            .withPageable(safePageable)
-            .withPageable(pageable).build();
+            .withPageable(safePageable).build();
         SearchHits<ArticleES> hits = elasticsearchOperations.search(searchQuery,
             ArticleES.class);
         List<ArticleES> documents = hits.getSearchHits().stream().map(SearchHit::getContent)
@@ -138,5 +143,4 @@ public class SearchService {
         return SearchApiResponse.builder().totalHits(hits.getTotalHits()).documents(documents)
             .build();
     }
-
 }
